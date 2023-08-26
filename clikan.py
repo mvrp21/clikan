@@ -137,92 +137,95 @@ def add(task_text):
 
 
 @clikan.command()
-@click.argument('id')
-def delete(id):
+@click.argument('ids', required=True, nargs=-1)
+def delete(ids):
     """Delete task"""
-    config = read_config_yaml()
-    dd = read_data(config)
-    try:
-        item = dd['data'].get(int(id))
-        if item is None:
-            click.echo('No existing task with that id.')
-        else:
-            item[0] = 'deleted'
-            item[2] = timestamp()
-            dd['deleted'].update({int(id): item})
-            dd['data'].pop(int(id))
-            write_data(config, dd)
-            click.echo('Removed task %d.' % int(id))
-            if ('repaint' in config and config['repaint']):
-                display()
-    except ValueError:
-        click.echo('Invalid task id')
+    for id in ids:
+        config = read_config_yaml()
+        dd = read_data(config)
+        try:
+            item = dd['data'].get(int(id))
+            if item is None:
+                click.echo('No existing task with that id.')
+            else:
+                item[0] = 'deleted'
+                item[2] = timestamp()
+                dd['deleted'].update({int(id): item})
+                dd['data'].pop(int(id))
+                write_data(config, dd)
+                click.echo('Removed task %d.' % int(id))
+                if ('repaint' in config and config['repaint']):
+                    display()
+        except ValueError:
+            click.echo('Invalid task id')
 
 
 @clikan.command()
-@click.argument('id')
-def promote(id):
+@click.argument('ids', required=True, nargs=-1)
+def promote(ids):
     """Promote task"""
     config = read_config_yaml()
     dd = read_data(config)
     todos, inprogs, dones = split_items(config, dd)
 
-    try:
-        item = dd['data'].get(int(id))
-        if item is None:
-            click.echo('No existing task with that id.')
-        elif item[0] == 'todo':
-            if ('limits' in config and 'wip' in config['limits'] and
-                    int(config['limits']['wip']) <= len(inprogs)):
-                click.echo(
-                    'Can not promote, in-progress limit of %s reached.'
-                    % config['limits']['wip']
-                )
-            else:
-                click.echo('Promoting task %s to in-progress.' % id)
-                dd['data'][int(id)] = [
-                    'inprogress',
-                    item[1], timestamp(),
-                    item[3]
-                ]
+    for id in ids:
+        try:
+            item = dd['data'].get(int(id))
+            if item is None:
+                click.echo('No existing task with that id.')
+            elif item[0] == 'todo':
+                if ('limits' in config and 'wip' in config['limits'] and
+                        int(config['limits']['wip']) <= len(inprogs)):
+                    click.echo(
+                        'Can not promote, in-progress limit of %s reached.'
+                        % config['limits']['wip']
+                    )
+                else:
+                    click.echo('Promoting task %s to in-progress.' % id)
+                    dd['data'][int(id)] = [
+                        'inprogress',
+                        item[1], timestamp(),
+                        item[3]
+                    ]
+                    write_data(config, dd)
+                    if ('repaint' in config and config['repaint']):
+                        display()
+            elif item[0] == 'inprogress':
+                click.echo('Promoting task %s to done.' % id)
+                dd['data'][int(id)] = ['done', item[1], timestamp(), item[3]]
                 write_data(config, dd)
                 if ('repaint' in config and config['repaint']):
                     display()
+            else:
+                click.echo('Can not promote %s, already done.' % id)
+        except ValueError:
+            click.echo('Invalid task id')
+
+
+@clikan.command()
+@click.argument('ids', required=True, nargs=-1)
+def regress(ids):
+    """Regress task"""
+    config = read_config_yaml()
+    dd = read_data(config)
+    for id in ids:
+        item = dd['data'].get(int(id))
+        if item is None:
+            click.echo('No existing task with that id.')
+        elif item[0] == 'done':
+            click.echo('Regressing task %s to in-progress.' % id)
+            dd['data'][int(id)] = ['inprogress', item[1], timestamp(), item[3]]
+            write_data(config, dd)
+            if ('repaint' in config and config['repaint']):
+                display()
         elif item[0] == 'inprogress':
-            click.echo('Promoting task %s to done.' % id)
-            dd['data'][int(id)] = ['done', item[1], timestamp(), item[3]]
+            click.echo('Regressing task %s to todo.' % id)
+            dd['data'][int(id)] = ['todo', item[1], timestamp(), item[3]]
             write_data(config, dd)
             if ('repaint' in config and config['repaint']):
                 display()
         else:
-            click.echo('Can not promote %s, already done.' % id)
-    except ValueError:
-        click.echo('Invalid task id')
-
-
-@clikan.command()
-@click.argument('id')
-def regress(id):
-    """Regress task"""
-    config = read_config_yaml()
-    dd = read_data(config)
-    item = dd['data'].get(int(id))
-    if item is None:
-        click.echo('No existing task with that id.')
-    elif item[0] == 'done':
-        click.echo('Regressing task %s to in-progress.' % id)
-        dd['data'][int(id)] = ['inprogress', item[1], timestamp(), item[3]]
-        write_data(config, dd)
-        if ('repaint' in config and config['repaint']):
-            display()
-    elif item[0] == 'inprogress':
-        click.echo('Regressing task %s to todo.' % id)
-        dd['data'][int(id)] = ['todo', item[1], timestamp(), item[3]]
-        write_data(config, dd)
-        if ('repaint' in config and config['repaint']):
-            display()
-    else:
-        click.echo('Already in todo, can not regress %s' % id)
+            click.echo('Already in todo, can not regress %s' % id)
 
 
 # Use a non-Click function to allow for repaint to work.
