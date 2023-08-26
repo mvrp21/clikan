@@ -154,10 +154,10 @@ def delete(ids):
                 dd['data'].pop(int(id))
                 write_data(config, dd)
                 click.echo('Removed task %d.' % int(id))
-                if ('repaint' in config and config['repaint']):
-                    display()
         except ValueError:
             click.echo('Invalid task id')
+    if ('repaint' in config and config['repaint']):
+        display()
 
 
 @clikan.command()
@@ -188,18 +188,16 @@ def promote(ids):
                         item[3]
                     ]
                     write_data(config, dd)
-                    if ('repaint' in config and config['repaint']):
-                        display()
             elif item[0] == 'inprogress':
                 click.echo('Promoting task %s to done.' % id)
                 dd['data'][int(id)] = ['done', item[1], timestamp(), item[3]]
                 write_data(config, dd)
-                if ('repaint' in config and config['repaint']):
-                    display()
             else:
                 click.echo('Can not promote %s, already done.' % id)
         except ValueError:
-            click.echo('Invalid task id')
+            click.echo(f'Invalid task id: {id}')
+    if ('repaint' in config and config['repaint']):
+        display()
 
 
 @clikan.command()
@@ -216,8 +214,6 @@ def regress(ids):
             click.echo('Regressing task %s to in-progress.' % id)
             dd['data'][int(id)] = ['inprogress', item[1], timestamp(), item[3]]
             write_data(config, dd)
-            if ('repaint' in config and config['repaint']):
-                display()
         elif item[0] == 'inprogress':
             click.echo('Regressing task %s to todo.' % id)
             dd['data'][int(id)] = ['todo', item[1], timestamp(), item[3]]
@@ -226,6 +222,8 @@ def regress(ids):
                 display()
         else:
             click.echo('Already in todo, can not regress %s' % id)
+    if ('repaint' in config and config['repaint']):
+        display()
 
 
 # Use a non-Click function to allow for repaint to work.
@@ -250,15 +248,12 @@ def display():
     table.add_column(
         "[bold yellow]todo[/bold yellow]",
         no_wrap=True,
-        # footer="clikan"
     )
     table.add_column('[bold green]in-progress[/bold green]', no_wrap=True)
     table.add_column(
         '[bold magenta]done[/bold magenta]',
         no_wrap=True,
-        # footer="v.{}".format(VERSION)
     )
-
     table.add_row(todos, inprogs, dones)
     console.print(table)
 
