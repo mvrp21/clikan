@@ -6,7 +6,7 @@ from click_default_group import DefaultGroup
 import yaml
 import os
 import sys
-from textwrap import wrap
+# from textwrap import wrap
 import collections
 import datetime
 import configparser
@@ -83,7 +83,7 @@ def read_config(ctx, param, value):
 @click.version_option(VERSION)
 @click.command(cls=AliasedGroup, default='show', default_if_no_args=True)
 def clikan():
-    """clikan: CLI personal kanban """
+    """clikan: CLI personal kanban"""
 
 
 @clikan.command()
@@ -102,11 +102,13 @@ def configure():
 
 
 @clikan.command()
-@click.argument('task')
-def add(task):
+@click.argument('task_text', required=True, nargs=-1)
+def add(task_text):
     """Add a task in todo"""
     config = read_config_yaml()
     dd = read_data(config)
+
+    task = ' '.join(task_text)
 
     if ('limits' in config and 'taskname' in config['limits']):
         taskname_length = config['limits']['taskname']
