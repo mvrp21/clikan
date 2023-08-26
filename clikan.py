@@ -243,17 +243,17 @@ def display():
     inprogs = '\n'.join([str(x) for x in inprogs])
     dones = '\n'.join([str(x) for x in dones])
 
-    table = Table(show_header=True, show_footer=True)
+    table = Table(show_header=True, show_footer=False)
     table.add_column(
         "[bold yellow]todo[/bold yellow]",
         no_wrap=True,
-        footer="clikan"
+        # footer="clikan"
     )
     table.add_column('[bold green]in-progress[/bold green]', no_wrap=True)
     table.add_column(
         '[bold magenta]done[/bold magenta]',
         no_wrap=True,
-        footer="v.{}".format(VERSION)
+        # footer="v.{}".format(VERSION)
     )
 
     table.add_row(todos, inprogs, dones)
