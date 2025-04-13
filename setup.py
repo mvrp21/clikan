@@ -1,18 +1,19 @@
 from setuptools import setup
 import os
-version_file = open(os.path.join('./', 'VERSION'))
-version = version_file.read().strip()
+
+with open(os.path.join(os.getcwd(), 'VERSION')) as version_file:
+    version = version_file.read().strip()
 
 with open('README.md', 'r') as fh:
     long_description = fh.read()
 
 setup(
-    author='Kit Plummer',
-    author_email='kitplummer@gmail.com',
+    author='Marcus V.',
+    author_email='mvrp21@inf.ufpr.br',
     name='clikan',
-    url='https://github.com/kitplummer/clikan',
+    url='https://github.com/mvrp21/clikan',
     version=version,
-    description='Simple CLI-based Kanban board',
+    description='A fork of clikan - for improved personal use',
     long_description=long_description,
     long_description_content_type='text/markdown',
     py_modules=['clikan'],
