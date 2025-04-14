@@ -9,9 +9,10 @@ import sys
 import collections
 import datetime
 import configparser
-import importlib
+# import importlib
+import importlib.metadata as importlib_metadata
 
-VERSION = importlib.metadata.version('clikan')
+VERSION = importlib_metadata.version('clikan')
 
 
 class Config(object):
